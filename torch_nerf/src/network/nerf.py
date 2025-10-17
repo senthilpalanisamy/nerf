@@ -33,9 +33,17 @@ class NeRF(nn.Module):
         Constructor of class 'NeRF'.
         """
         super().__init__()
+        self.pos_dim = pos_dim
+        self.view_dir_dim = view_dir_sim
 
-        # TODO
-        raise NotImplementedError("Task 1")
+        self.positional_dims = 60
+        self.linear_layers = nn.ModuleList(
+                [nn.Linear(self.positional_dims, feat_dims)]+
+                [nn.Linear(feat_dims+self.positional_dims if i==4 else feat_dim, feat_dim) for i in range(8)])
+        self.density_prediction = nn.Linear(feat_dim, 1)
+        self.bottle_neck = nn.Linear(feat_dim + view_dir_dims, 128)
+        self.rgb = nn.Linear(128, 3)
+
 
     @jaxtyped
     @typechecked
@@ -58,6 +66,20 @@ class NeRF(nn.Module):
             sigma: The density predictions evaluated at the given sample points.
             radiance: The radiance predictions evaluated at the given sample points.
         """
+        x = pos
 
-        # TODO
-        raise NotImplementedError("Task 1")
+        for i in range(9): 
+            x = self.linear_layers(x)
+            x = F.ReLU(x)
+
+            if i==4:
+                x = torch.cat([x, pos], -1) 
+
+        sigma = self.density_prediction(x)
+        x = torch.cat([x, view_dir], -1)
+        x = F.ReLU(self.bottle_neck(x))
+        rgb = self.rgb(x) 
+        return sigma, rgb
+        
+            
+
