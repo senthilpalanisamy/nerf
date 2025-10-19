@@ -48,9 +48,9 @@ class QuadratureIntegrator(IntegratorBase):
         density_sum = -sigma * delta
         density_cumsum = torch.cumsum(density_sum, dim=1)[:,:-1]
         transparency = torch.exp(density_cumsum)
-        zeros = torch.zeros(B, device=device)
+        zeros = torch.ones(B, device=device)
         transparency = torch.cat([zeros.unsqueeze(1), transparency], dim=1)        
-        weights = transparency * (1 - torch.exp(torch.clamp(-sigma * delta, max=30.0)))
+        weights = transparency * (1 - torch.exp(torch.clamp(-sigma * delta, max=10.0)))
         weighted_radiance = weights.unsqueeze(-1) * radiance
         rgbs = torch.sum(weighted_radiance, dim=1)
         return rgbs, weights

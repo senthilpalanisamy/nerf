@@ -78,7 +78,7 @@ class NeRF(nn.Module):
             if i==4:
                 x = torch.cat([x, pos], -1) 
 
-        sigma = self.density_prediction(x)
+        sigma = F.relu(self.density_prediction(x))
         x = torch.cat([x, view_dir], -1)
         x = F.relu(self.bottle_neck(x))
         rgb = self.rgb(x) 
