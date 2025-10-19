@@ -107,7 +107,7 @@ def train_one_epoch(
         # parse batch
         pixel_gt, extrinsic = batch
         pixel_gt = pixel_gt.squeeze()
-        pixel_gt = pixel_gt.reshape(-1, 3)  # (H, W, 3) -> (H * W, 3)
+        pixel_gt = pixel_gt.reshape(-1, 3).to(device)  # (H, W, 3) -> (H * W, 3)
         extrinsic = extrinsic.squeeze()
 
         # initialize gradients
@@ -165,6 +165,8 @@ def train_one_epoch(
             cfg.renderer.num_samples_coarse,
             cfg.renderer.project_to_ndc,
         )
+        
+        
         coarse_loss = loss_func(pixel_gt[pixel_indices, ...].to(coarse_pred), coarse_pred)
         loss += coarse_loss
         if "coarse_loss" not in loss_dict:
@@ -175,6 +177,7 @@ def train_one_epoch(
         if not fine_scene is None:
 
             # forward prop.
+            pixel_indices = pixel_indices.to(device)
             fine_pred, _, _ = renderer.render_scene(
                 fine_scene,
                 camera,
