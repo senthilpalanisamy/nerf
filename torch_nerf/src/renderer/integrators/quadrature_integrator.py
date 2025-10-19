@@ -41,6 +41,11 @@ class QuadratureIntegrator(IntegratorBase):
                 A weight at a sample point is defined as a product of transmittance and opacity,
                 where opacity (alpha) is defined as 1 - exp(-sigma * delta).
         """
-        # TODO
-        # HINT: Look up the documentation of 'torch.cumsum'.
-        raise NotImplementedError("Task 3")
+        density_sum = i-sigma * delta
+        density_cumsum = torch.cumsum(density_sum, dim=1)
+        transparency = torch.exp(density_sumcum)
+        weights = transparency * (1 - torch.exp(-sigma * delta))
+        weighted_radiance = radiance * weights
+        rgbs = torch.sum(weighted_radiance, dim=1)
+        return rgbs, weights
+
