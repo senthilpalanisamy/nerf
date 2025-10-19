@@ -62,10 +62,15 @@ class StratifiedSampler(RaySamplerBase):
                 The values should lie in the range defined by the near and
                 far bounds of the ray bundle.
         """
+        B = ray_bundle.nears.shape[0]
+        device = ray_bundle.nears.device
 
-        # TODO
-        # HINT: Freely use the provided methods 'create_t_bins' and 'map_t_to_euclidean'
-        raise NotImplementedError("Task 2")
+        random_points = torch.rand(int(B),num_sample, device=device)
+        far_repeated = ray_bundle.fars.unsqueeze(1).repeat(1, num_sample)
+        near_repeated = ray_bundle.nears.unsqueeze(1).repeat(1, num_sample)
+        t_samples = near_repeated + random_points * (far_repeated - near_repeated)
+        return t_samples
+
 
     @jaxtyped
     @typechecked
